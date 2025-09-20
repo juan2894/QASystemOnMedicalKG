@@ -1,209 +1,265 @@
-# QABasedOnMedicaKnowledgeGraph
-self-implement of disease centered Medical graph from zero to full and sever as question answering base. 从无到有搭建一个以疾病为中心的一定规模医药领域知识图谱，并以该知识图谱完成自动问答与分析服务。
+### **QABasedOnMedicaKnowledgeGraph**
 
-# 项目介绍
+Implementación propia de un grafo médico centrado en enfermedades desde cero, para servir como base de un sistema de preguntas y respuestas.
 
-知识图谱是目前自然语言处理的一个热门方向，关于较全面的参考资料，可以查看我的ccks2018参会总结(https://github.com/liuhuanyong/CCKS2018Summary )。  
-与知识图谱相关的另一种形态，即事理图谱，本人在这方面也尝试性地积累了一些工作，可参考：(https://github.com/liuhuanyong/ComplexEventExtraction )  
-关于知识图谱概念性的介绍就不在此赘述。目前知识图谱在各个领域全面开花，如教育、医疗、司法、金融等。本项目立足医药领域，以垂直型医药网站为数据来源，以疾病为核心，构建起一个包含7类规模为4.4万的知识实体，11类规模约30万实体关系的知识图谱。
-本项目将包括以下两部分的内容：
-1) 基于垂直网站数据的医药知识图谱构建
-2) 基于医药知识图谱的自动问答
+---
 
-# 项目最终效果
-话不多少，直接上图。以下两图是实际问答运行过程中的截图：
-![image](https://github.com/liuhuanyong/QABasedOnMedicalKnowledgeGraph/blob/master/img/chat1.png)
+### **Introducción del Proyecto**
 
-![image](https://github.com/liuhuanyong/QABasedOnMedicalKnowledgeGraph/blob/master/img/chat2.png)
+Los grafos de conocimiento son actualmente una dirección popular en el procesamiento del lenguaje natural. Para obtener información más completa, puedes revisar mi resumen de participación en la CCKS2018 ([enlace](https://github.com/liuhuanyong/CCKS2018Summary)).
 
-# 项目运行方式
-1、配置要求：要求配置neo4j数据库及相应的python依赖包。neo4j数据库用户名密码记住，并修改相应文件。  
-2、知识图谱数据导入：python build_medicalgraph.py，导入的数据较多，估计需要几个小时。  
-3、启动问答：python chat_graph.py
+Otra variante relacionada con los grafos de conocimiento es el grafo de eventos o razonamiento, en el que también he acumulado algunos trabajos exploratorios. Puedes consultar más detalles aquí: ([enlace](https://github.com/liuhuanyong/ComplexEventExtraction)).
 
-# 以下介绍详细方案
-# 一、医疗知识图谱构建
-# 1.1 业务驱动的知识图谱构建框架
-![image](https://github.com/liuhuanyong/QABasedOnMedicalKnowledgeGraph/blob/master/img/kg_route.png)
+No me extenderé en la introducción conceptual de los grafos de conocimiento. Actualmente, los grafos de conocimiento están floreciendo en múltiples campos como la educación, la medicina, la justicia y las finanzas. Este proyecto se enfoca en el ámbito médico, utilizando datos de sitios web médicos especializados como fuente de información. Con las enfermedades como núcleo, se construye un grafo de conocimiento que incluye alrededor de 44,000 entidades de conocimiento de 7 categorías y aproximadamente 300,000 relaciones entre estas entidades de 11 categorías.
 
-# 1.2 脚本目录
-prepare_data/datasoider.py：网络资讯采集脚本  
-prepare_data/datasoider.py：网络资讯采集脚本  
-prepare_data/max_cut.py：基于词典的最大向前/向后切分脚本  
-build_medicalgraph.py：知识图谱入库脚本    　　
+El proyecto incluirá dos partes principales:
+1. Construcción de un grafo de conocimiento médico basado en datos de sitios web especializados.
+2. Sistema de preguntas y respuestas automáticas basado en el grafo de conocimiento médico.
 
-# 1.3 医药领域知识图谱规模
-1.3.1 neo4j图数据库存储规模
-![image](https://github.com/liuhuanyong/QABasedOnMedicalKnowledgeGraph/blob/master/img/graph_summary.png)
+---
 
-1.3.2 知识图谱实体类型
+### **Resultado Final del Proyecto**
 
-| 实体类型 | 中文含义 | 实体数量 |举例 |
-| :--- | :---: | :---: | :--- |
-| Check | 诊断检查项目 | 3,353| 支气管造影;关节镜检查|
-| Department | 医疗科目 | 54 |  整形美容科;烧伤科|
-| Disease | 疾病 | 8,807 |  血栓闭塞性脉管炎;胸降主动脉动脉瘤|
-| Drug | 药品 | 3,828 |  京万红痔疮膏;布林佐胺滴眼液|
-| Food | 食物 | 4,870 |  番茄冲菜牛肉丸汤;竹笋炖羊肉|
-| Producer | 在售药品 | 17,201 |  通药制药青霉素V钾片;青阳醋酸地塞米松片|
-| Symptom | 疾病症状 | 5,998 |  乳腺组织肥厚;脑实质深部出血|
-| Total | 总计 | 44,111 | 约4.4万实体量级|
+Sin más preámbulos, aquí están las capturas de pantalla del proceso de preguntas y respuestas en acción:
 
+![imagen](https://github.com/liuhuanyong/QABasedOnMedicalKnowledgeGraph/blob/master/img/chat1.png)
+![imagen](https://github.com/liuhuanyong/QABasedOnMedicalKnowledgeGraph/blob/master/img/chat2.png)
 
-1.3.3 知识图谱实体关系类型
+---
 
-| 实体关系类型 | 中文含义 | 关系数量 | 举例|
-| :--- | :---: | :---: | :--- |
-| belongs_to | 属于 | 8,844| <妇科,属于,妇产科>|
-| common_drug | 疾病常用药品 | 14,649 | <阳强,常用,甲磺酸酚妥拉明分散片>|
-| do_eat |疾病宜吃食物 | 22,238| <胸椎骨折,宜吃,黑鱼>|
-| drugs_of |  药品在售药品 | 17,315| <青霉素V钾片,在售,通药制药青霉素V钾片>|
-| need_check | 疾病所需检查 | 39,422| <单侧肺气肿,所需检查,支气管造影>|
-| no_eat | 疾病忌吃食物 | 22,247| <唇病,忌吃,杏仁>|
-| recommand_drug | 疾病推荐药品 | 59,467 | <混合痔,推荐用药,京万红痔疮膏>|
-| recommand_eat | 疾病推荐食谱 | 40,221 | <鞘膜积液,推荐食谱,番茄冲菜牛肉丸汤>|
-| has_symptom | 疾病症状 | 5,998 |  <早期乳腺癌,疾病症状,乳腺组织肥厚>|
-| acompany_with | 疾病并发疾病 | 12,029 | <下肢交通静脉瓣膜关闭不全,并发疾病,血栓闭塞性脉管炎>|
-| Total | 总计 | 294,149 | 约30万关系量级|
+### **Forma de Ejecución del Proyecto**
 
-1.3.4 知识图谱属性类型
+1. **Requisitos de Configuración:** Se requiere configurar la base de datos neo4j y las dependencias de Python correspondientes. Recuerda el nombre de usuario y contraseña de la base de datos neo4j y modifica los archivos correspondientes.
+2. **Importación de Datos del Grafo de Conocimiento:** Ejecuta `python build_medicalgraph.py`. La importación de datos puede tardar varias horas debido a la gran cantidad de información.
+3. **Iniciar el Sistema de Preguntas y Respuestas:** Ejecuta `python chat_graph.py`.
 
-| 属性类型 | 中文含义 | 举例 |
-| :--- | :---: | :---: |
-| name | 疾病名称 | 喘息样支气管炎 |
-| desc | 疾病简介 | 又称哮喘性支气管炎... |
-| cause | 疾病病因 | 常见的有合胞病毒等...|
-| prevent | 预防措施 | 注意家族与患儿自身过敏史... |
-| cure_lasttime | 治疗周期 | 6-12个月 |
-| cure_way | 治疗方式 | "药物治疗","支持性治疗" |
-| cured_prob | 治愈概率 | 95% |
-| easy_get | 疾病易感人群 | 无特定的人群 |
+---
+
+### **Esquema Detallado del Proyecto**
+
+#### **1. Construcción del Grafo de Conocimiento Médico**
+
+##### **1.1 Marco de Construcción del Grafo de Conocimiento Basado en Negocios**
+![imagen](https://github.com/liuhuanyong/QABasedOnMedicalKnowledgeGraph/blob/master/img/kg_route.png)
+
+##### **1.2 Directorio de Scripts**
+- `prepare_data/datasoider.py`: Script para la recolección de información en línea.
+- `prepare_data/max_cut.py`: Script para la segmentación máxima hacia adelante/atrás basada en diccionario.
+- `build_medicalgraph.py`: Script para la importación de datos al grafo de conocimiento.
+
+##### **1.3 Escala del Grafo de Conocimiento Médico**
+
+###### **1.3.1 Escala de Almacenamiento en la Base de Datos Neo4j**
+![imagen](https://github.com/liuhuanyong/QABasedOnMedicalKnowledgeGraph/blob/master/img/graph_summary.png)
+
+###### **1.3.2 Tipos de Entidades en el Grafo de Conocimiento**
 
 
-# 二、基于医疗知识图谱的自动问答
-# 2.1 技术架构
-![image](https://github.com/liuhuanyong/QABasedOnMedicalKnowledgeGraph/blob/master/img/qa_route.png)
 
-# 2.2 脚本结构
-question_classifier.py：问句类型分类脚本  
-question_parser.py：问句解析脚本  
-chatbot_graph.py：问答程序脚本  
+| Tipo de Entidad  | Significado en Español | Cantidad de Entidades | Ejemplo                     |
+|------------------|------------------------|-----------------------|-----------------------------|
+| Check            | Prueba de Diagnóstico  | 3,353                 | Broncografía; Artroscopia    |
+| Department       | Departamento Médico    | 54                    | Cirugía Plástica; Quemados   |
+| Disease          | Enfermedad             | 8,807                 | Tromboangeítis Obliterante; Aneurisma de la aorta torácica descendente |
+| Drug             | Medicamento            | 3,828                 | Ungüento Jingwanhem; Gotas de Brinzolamida |
+| Food             | Comida                 | 4,870                 | Sopa de albóndigas de carne con tomate; Estofado de brotes de bambú con carne de cordero |
+| Producer         | Producto en Venta      | 17,201                | Tabletas de Penicilina V Potásica Tongyao; Tabletas de Dexametasona QiYang |
+| Symptom          | Síntoma                | 5,998                 | Hiperplasia del tejido mamario; Hemorragia cerebral profunda |
+| **Total**        | **Total**              | **44,111**            | Aprox. 44,000 entidades     |
 
-# 2.3　支持问答类型
+###### **1.3.3 Tipos de Relaciones entre Entidades en el Grafo de Conocimiento**
 
-| 问句类型 | 中文含义 | 问句举例 |
-| :--- | :---: | :---: |
-| disease_symptom | 疾病症状| 乳腺癌的症状有哪些？ |
-| symptom_disease | 已知症状找可能疾病 | 最近老流鼻涕怎么办？ |
-| disease_cause | 疾病病因 | 为什么有的人会失眠？|
-| disease_acompany | 疾病的并发症 | 失眠有哪些并发症？ |
-| disease_not_food | 疾病需要忌口的食物 | 失眠的人不要吃啥？ |
-| disease_do_food | 疾病建议吃什么食物 | 耳鸣了吃点啥？ |
-| food_not_disease | 什么病最好不要吃某事物 | 哪些人最好不好吃蜂蜜？ |
-| food_do_disease | 食物对什么病有好处| 鹅肉有什么好处？ |
-| disease_drug | 啥病要吃啥药 | 肝病要吃啥药？ |
-| drug_disease | 药品能治啥病 | 板蓝根颗粒能治啥病？ |
-| disease_check | 疾病需要做什么检查 | 脑膜炎怎么才能查出来？|
-| check_disease |　检查能查什么病 | 全血细胞计数能查出啥来？ |
-| disease_prevent | 预防措施| 怎样才能预防肾虚？ |
-| disease_lasttime | 治疗周期 | 感冒要多久才能好？ |
-| disease_cureway | 治疗方式 | 高血压要怎么治？ |
-| disease_cureprob | 治愈概率 | 白血病能治好吗？ |
-| disease_easyget | 疾病易感人群 | 什么人容易得高血压？ |
-| disease_desc | 疾病描述 | 糖尿病 |
 
-# 问答结果展示
 
-        用户:乳腺癌的症状有哪些？
-        小勇: 乳腺癌的症状包括：乳腺癌的远处转移；胸痛；乳头溢液；乳头破碎；肝肿大；泌乳障碍；乳头内陷；乳房肿块；剧痛
-        ******************************************************************************************
-        用户:最近老流鼻涕怎么办？
-        小勇: 症状流鼻涕可能染上的疾病有：枯草热；副流行性感冒；急性上呼吸道感染；硫化氢中毒；小儿衣原体肺炎；风寒感冒；慢性额窦炎；鼻源性头痛；人禽流行性感冒；小儿流行性喘憋性肺炎；病毒性感冒；慢性鼻炎；风热犯肺；感冒；顿呛；小儿急性上呼吸道感染；嗜酸细胞增多性非变态反应性鼻炎；干酪性鼻窦炎；下呼吸道感染；麻疹
-        ******************************************************************************************
-        用户:为什么有的人会失眠？
-        小勇: 失眠可能的成因有：躯体疾病和服用药物可以影响睡眠，如消化不良，头痛，背痛，关节炎，心脏病，糖尿病，哮喘，鼻窦炎，溃疡病，或服用某些影响中枢神经的药物。
-        由于生活方式引起睡眠问题也很常见，如饮用咖啡或茶叶，晚间饮酒，睡前进食或晚饭较晚造成满腹食物尚未消化，大量吸烟，睡前剧烈的体力活动，睡前过度的精神活动，夜班工作，白天小睡，上床时间不规律，起床时间不规律。
-        可能的原因有压力很大，过度忧虑，紧张或焦虑，悲伤或抑郁，生气，容易出现睡眠问题。
-        吵闹的睡眠环境，睡眠环境过于明亮，污染，过度拥挤。
-        ******************************************************************************************
-        用户:失眠有哪些并发症？
-        小勇: 失眠的症状包括：心肾不交；神经性耳鸣；咽鼓管异常开放症；偏执狂；十二指肠胃反流及胆汁反流性胃炎；腋臭；黧黑斑；巨细胞动脉炎；Stargardt病；抑郁症；腔隙性脑梗死；甲状腺功能亢进伴发的精神障碍；紧张性头痛；胃下垂；心血虚；迷路震荡；口腔结核性溃疡；痰饮；游走性结节性脂膜炎；小儿脑震荡
-        ******************************************************************************************
-        用户:失眠的人不要吃啥？
-        小勇: 失眠忌食的食物包括有：油条；河蚌；猪油（板油）；淡菜(鲜)
-        ******************************************************************************************
-        用户:耳鸣了吃点啥？
-        小勇: 耳鸣宜食的食物包括有：南瓜子仁;鸡翅;芝麻;腰果
-        推荐食谱包括有：紫菜芙蓉汤;羊肉汤面;油豆腐油菜;紫菜鸡蛋莲草汤;乌药羊肉汤;可乐鸡翅;栗子鸡翅;冬菇油菜心
-        ******************************************************************************************
-        用户:哪些人最好不好吃蜂蜜？
-        小勇: 患有散发性脑炎伴发的精神障碍；情感性心境障碍；蝎螫伤；四肢淋巴水肿；农药中毒所致的精神障碍；肝错构瘤；细菌性肺炎；急性高原病；小儿颅后窝室管膜瘤；柯萨奇病毒疹；眼眶静脉性血管瘤；乙脑伴发的精神障碍；晚期产后出血；吸入性肺炎；腓总神经损伤；铍及其化合物引起的皮肤病；猝死型冠心病；彼得异常；过敏性急性小管间质性肾炎；小儿腹胀的人最好不要吃蜂蜜
-        ******************************************************************************************
-        用户:鹅肉有什么好处？
-        小勇: 患有子宫内膜厚；呼吸疾病；肛肠病；闭经；丧偶后适应性障碍；宫颈外翻；巨球蛋白血症；急性颌下腺炎；锥体外系损害；腺样体炎；咳嗽；错构瘤；牙科病；子宫内膜炎；闭锁综合征；结膜炎；恶性淋巴瘤；足外翻；神经炎；病理性近视的人建议多试试鹅肉
-        ******************************************************************************************
-        用户:肝病要吃啥药？
-        小勇: 肝病宜食的食物包括有：鹅肉;鸡肉;鸡肝;鸡腿
-        推荐食谱包括有：小米红糖粥;小米蛋奶粥;扁豆小米粥;黄豆小米粥;人参小米粥;小米粉粥;鲜菇小米粥;芝麻小米粥
-        肝病通常的使用的药品包括：恩替卡韦分散片；维生素C片；二十五味松石丸；拉米夫定胶囊；阿德福韦酯片
-        ******************************************************************************************
-        用户:板蓝根颗粒能治啥病？
-        小勇: 板蓝根颗粒主治的疾病有流行性腮腺炎；喉痹；喉炎；咽部异感症；急性单纯性咽炎；腮腺隙感染；过敏性咽炎；咽囊炎；急性鼻咽炎；喉水肿；慢性化脓性腮腺炎；慢性咽炎；急性喉炎；咽异感症；鼻咽炎；锁喉痈；小儿咽喉炎；喉返神经损伤；化脓性腮腺炎；喉血管瘤,可以试试
-        ******************************************************************************************
-        用户:脑膜炎怎么才能查出来？
-        小勇: 脑膜炎通常可以通过以下方式检查出来：脑脊液钠；尿常规；Fisher手指试验；颈项强直；脑脊液细菌培养；尿谷氨酰胺；脑脊液钾；脑脊液天门冬氨酸氨基转移酶；脑脊液病原体检查；硝酸盐还原试验
-        ******************************************************************************************
-        用户:怎样才能预防肾虚？
-        小勇: 肾虚可能的成因有：1、多因房劳过度，或少年频繁手淫。2、思虑忧郁，损伤心脾，则病及阳明冲脉。3、恐惧伤肾，恐则伤肾。4、肝主筋，阴器为宗筋之汇，若情志不遂，忧思郁怒，肝失疏泄条达，则宗筋所聚无能。5、湿热下注，宗筋弛纵。
-        肾虚是肾脏精气阴阳不足所产生的诸如精神疲乏、头晕耳鸣、健忘脱发、腰脊酸痛、遗精阳痿、男子不育、女子不孕、更年期综合征等多种病证的一个综合概念。关于肾虚形成的原因，可归结为两个方面，一为先天禀赋不足，二为后天因素引起。
-        从引起肾虚的先天因素来看，首先是先天禀赋薄弱。《灵枢.寿天刚柔》篇说：“人之生也，有刚有柔，有弱有强。”由于父母体弱多病，精血亏虚时怀孕;或酒后房事怀孕;或年过五十精气力量大减之时怀孕;或男女双方年龄不够，身体发育不完全结婚，也就是早婚时怀孕，或生育过多，精血过度耗损;或妊娠期中失于调养，胎气不足等等都可导致肾的精气亏虚成为肾虚证形成的重要原因;其次，如果肾藏精功能失常就会导致性功能异常，生殖功能下降，影响生殖能力，便会引起下一代形体虚衰，或先天畸形、痴呆、缺陷、男子出现精少不育、早泄，女子出现闭经不孕、小产、习惯性流产等等。
-        肾虚的预防措施包括：肾虚日常预防
-        在预防方面，因起病与恣情纵欲有关的，应清心寡欲，戒除手淫;如与全身衰弱、营养不良或身心过劳有关的，应适当增加营养或注意劳逸结合，节制性欲。
-        1、性生活要适度，不勉强，不放纵。
-        2、饮食方面：无力疲乏时多吃含铁、蛋白质的食物，如木耳、大枣、乌鸡等;消化不良者多喝酸奶，吃山楂;平日护肾要多吃韭菜、海参、人参、乌鸡、家鸽等。
-        3、经常进行腰部活动，这些运动可以健运命门，补肾纳气。还可多做一些刺激脚心的按摩，中医认为，脚心的涌泉穴是浊气下降的地方，经常按摩涌泉穴，可益精补肾、强身健体、防止早衰，并能舒肝明目，清喉定心，促进睡眠，增进食欲。
-        4、充足的睡眠也是恢复精气神的重要保障，工作再紧张，家里的烦心事再多，到了该睡觉的时候也要按时休息。
-        健康教育
-        1、过度苦寒、冰凉的食物易伤肾，如芦荟、苦瓜、雪糕、鹅肉、啤酒进食过多都伤肾，应该多食黑色素含量高和温补性中药如黑米黑豆等。
-        2、男性接触过多的洗涤剂也伤肾，家庭应少用洗涤剂清洗餐具及蔬果，以免洗涤剂残留物被过多摄入。
-        3、适当运动可延缓衰老，但强度不宜太大，应选能力所及的运动项目，以促进血液循环，可改善血淤、气损等情况。散步、慢跑、快步走，或在鹅卵石上赤足适当行走，都会促进血液循环，对肾虚有辅助治疗作用。
-        4、保持良好的作息习惯，尽量避免熬夜。
-        5、积极参加户外运动，放松心情。
-        6、不要给自己太大的压力，学会合理减压。
-        ******************************************************************************************
-        用户:感冒要多久才能好？
-        小勇: 感冒治疗可能持续的周期为：7-14天
-        ******************************************************************************************
-        用户:高血压要怎么治？
-        小勇: 高血压可以尝试如下治疗：药物治疗;手术治疗;支持性治疗
-        ******************************************************************************************
-        用户:白血病能治好吗？
-        小勇: 白血病治愈的概率为（仅供参考）：50%-70%
-        ******************************************************************************************
-        用户:什么人容易得高血压？
-        小勇: 高血压的易感人群包括：有高血压家族史，不良的生活习惯，缺乏运动的人群
-        ******************************************************************************************
-        用户:糖尿病
-        小勇: 糖尿病,熟悉一下：糖尿病是一种比较常见的内分泌代谢性疾病。该病发病原因主要是由于胰岛素分泌不足，以及胰升高血糖素不适当地分泌过多所引起。多见于40岁以上喜食甜食而肥胖的病人，城市多于农村，常有家族史，故与遗传有关。少数病人与病毒感染和自身免疫反应有关。主要表现为烦渴、多饮、多尿、多食、乏力、消瘦等症状。生命的常见病，伴发高血压、冠心病、高脂血症等，严重时危及生命。
-        中医学认为，肝主疏泄，关系人体接收机的升降与调畅，肝气郁滞则气机升降输布紊乱，肝失疏泄则血糖等精微物质不能随清阳之气输布于周身而郁滞于血中，出现高血糖或精微物质的输布紊乱，反见血糖升高，进一步导致血脂、蛋白等其它精微物质紊乱，引起其他合并症，治疗以疏肝调气为主，顺肝条达之性以恢复其生理功能，肝气条达，气机调畅，精微得以输布，糖被利用而血糖自然下降。
-        另外，因糖尿病的发生和饮食有关，饮食控制的好坏直接影响着治疗的效果。再就是配合运动，注意调摄情志，再适当的配合中药治疗会取得良好的治疗效果。 
-        ******************************************************************************************
-        用户:全血细胞计数能查出啥来
-        小勇: 通常可以通过全血细胞计数检查出来的疾病有成人类风湿性关节炎性巩膜炎；外阴-阴道-牙龈综合征；电击伤；老年收缩期高血压；小儿肝硬化；异常血红蛋白病；痴呆综合征；高血压病伴发的精神障碍；睾丸淋巴瘤；叶酸缺乏所致贫血；眼球内炎；不稳定血红蛋白病；类癌综合征；老年痴呆；急性淋巴管炎；宫颈妊娠；蚕食性角膜溃疡；低增生性急性白血病；交感性眼炎；原发性免疫缺陷病
+| Tipo de Relación       | Significado en Español       | Cantidad de Relaciones | Ejemplo                                      |
+|------------------------|-------------------------------|------------------------|----------------------------------------------|
+| belongs_to             | Pertenece a                   | 8,844                  | <Ginecología, pertenece a, Obstetricia y Ginecología> |
+| common_drug            | Medicamento Común             | 14,649                 | <Priapismo, común, Tabletas dispersables de Fenoxibenzamina> |
+| do_eat                 | Alimento Recomendado          | 22,238                 | <Fractura de vértebra torácica, comer, Pez negro> |
+| drugs_of               | Medicamento en Venta          | 17,315                 | <Tabletas de Penicilina V Potásica, en venta, Tabletas de Penicilina V Potásica Tongyao> |
+| need_check             | Prueba Necesaria              | 39,422                 | <Enfisema pulmonar unilateral, prueba necesaria, Broncografía> |
+| no_eat                 | Alimento no Recomendado       | 22,247                 | <Enfermedad labial, evitar, Almendras>       |
+| recommand_drug         | Medicamento Recomendado       | 59,467                 | <Hemorroides mixtas, medicamento recomendado, Ungüento Jingwanhem> |
+| recommand_eat          | Dieta Recomendada             | 40,221                 | <Hidrocele, dieta recomendada, Sopa de albóndigas de carne con tomate> |
+| has_symptom            | Síntoma de Enfermedad         | 5,998                  | <Cáncer de mama en etapa temprana, síntoma, Hiperplasia del tejido mamario> |
+| acompany_with          | Enfermedad Concurrent         | 12,029                 | <Insuficiencia valvular de vena comunicante de extremidad inferior, enfermedad concurrent, Tromboangeítis Obliterante> |
+| **Total**              | **Total**                     | **294,149**            | Aprox. 300,000 relaciones                    |
 
-# 总结
-１、本项目完成了从无到有，以垂直网站为数据来源，构建起以疾病为中心的医疗知识图谱，实体规模4.4万，实体关系规模30万。并基于此，搭建起了一个可以回答18类问题的自动问答小系统,总共耗时3天。其中，数据采集与整理1天，知识图谱构建与入库0.5天，问答系统组件1.5天。总的来说，还是比较快速。      
-2、本项目以业务驱动，构建医疗知识图谱，知识schema设计基于所采集的结构化数据生成(对网页结构化数据进行xpath解析)。    
-3、本项目以neo4j作为存储，并基于传统规则的方式完成了知识问答，并最终以cypher查询语句作为问答搜索sql，支持了问答服务。  
-4、本项目可以快速部署，数据已经放在data/medical.json当中，本项目的数据，如侵犯相关单位权益，请联系我删除。本数据请勿商用，以免引起不必要的纠纷。在本项目中的部署上，可以遵循项目运行步骤，完成数据库搭建，并提供搜索服务。  
-5、本项目还有不足：关于疾病的起因、预防等，实际返回的是一大段文字，这里其实可以引入事件抽取的概念，进一步将原因结构化表示出来。这个可以后面进行尝试。    
+### 1.3.4 Tipos de Atributos del Grafo de Conocimiento
 
-If any question about the project or me ,see https://liuhuanyong.github.io/
 
-如有自然语言处理、知识图谱、事理图谱、社会计算、语言资源建设等问题或合作，可联系我：    
-1、我的github项目介绍：https://liuhuanyong.github.io  
-3、about me:刘焕勇，lhy_in_blcu@126.com.       
-4、我的公众号:老刘说NLP,扫码一键关注： 
 
-![image](https://github.com/liuhuanyong/QABasedOnMedicalKnowledgeGraph/blob/master/img/wechat.jpg)
+| Tipo de Atributo | Significado en Español       | Ejemplo                     |
+|------------------|------------------------------|-----------------------------|
+| name             | Nombre de la enfermedad      | Bronquitis asmatiforme      |
+| desc             | Descripción de la enfermedad | También conocida como bronquitis asmática... |
+| cause            | Causa de la enfermedad       | Comúnmente causada por el virus sincitial respiratorio... |
+| prevent          | Medidas preventivas          | Prestar atención a los antecedentes alérgicos familiares y del niño... |
+| cure_lasttime    | Duración del tratamiento     | 6-12 meses                  |
+| cure_way         | Método de tratamiento        | "Tratamiento farmacológico", "Tratamiento de soporte" |
+| cured_prob       | Probabilidad de curación     | 95%                         |
+| easy_get         | Grupos susceptibles           | No hay un grupo específico  |
+
+---
+
+### 2. Sistema de Preguntas y Respuestas Basado en el Grafo de Conocimiento Médico
+
+### 2.1 Arquitectura Técnica
+![imagen](https://github.com/liuhuanyong/QABasedOnMedicalKnowledgeGraph/blob/master/img/qa_route.png)
+
+### 2.2 Estructura de Scripts
+- `question_classifier.py`: Script para clasificar el tipo de pregunta.
+- `question_parser.py`: Script para analizar la pregunta.
+- `chatbot_graph.py`: Script del programa de preguntas y respuestas.
+
+### 2.3 Tipos de Preguntas Soportadas
+
+
+
+| Tipo de Pregunta         | Significado en Español               | Ejemplo de Pregunta                     |
+|--------------------------|---------------------------------------|-----------------------------------------|
+| disease_symptom          | Síntomas de la enfermedad             | ¿Cuáles son los síntomas del cáncer de mama? |
+| symptom_disease          | Encontrar posibles enfermedades por síntomas | Últimamente tengo mucho moco nasal, ¿qué puedo hacer? |
+| disease_cause            | Causa de la enfermedad                | ¿Por qué algunas personas sufren de insomnio? |
+| disease_acompany         | Complicaciones de la enfermedad      | ¿Qué complicaciones tiene el insomnio? |
+| disease_not_food         | Alimentos que deben evitarse          | ¿Qué no deben comer las personas con insomnio? |
+| disease_do_food          | Alimentos recomendados                | ¿Qué debo comer si tengo acúfenos? |
+| food_not_disease         | Enfermedades que deben evitar ciertos alimentos | ¿Quiénes no deben comer miel? |
+| food_do_disease          | Beneficios de un alimento para enfermedades | ¿Qué beneficios tiene la carne de ganso? |
+| disease_drug             | Medicamentos para enfermedades        | ¿Qué medicamentos debo tomar para enfermedades del hígado? |
+| drug_disease             | Enfermedades que trata un medicamento | ¿Qué enfermedades trata Banlangen Kulili? |
+| disease_check            | Pruebas necesarias para una enfermedad | ¿Cómo se detecta la meningitis? |
+| check_disease            | Enfermedades detectables por una prueba | ¿Qué enfermedades puede detectar un hemograma completo? |
+| disease_prevent          | Medidas preventivas                   | ¿Cómo puedo prevenir la deficiencia renal? |
+| disease_lasttime         | Duración del tratamiento              | ¿Cuánto tiempo tarda en curarse un resfriado? |
+| disease_cureway          | Método de tratamiento                 | ¿Cómo se trata la hipertensión? |
+| disease_cureprob         | Probabilidad de curación              | ¿Se puede curar la leucemia? |
+| disease_easyget          | Grupos susceptibles                   | ¿Qué personas son más propensas a tener hipertensión? |
+| disease_desc             | Descripción de la enfermedad          | Diabetes                                   |
+
+---
+
+### Ejemplos de Resultados de Preguntas y Respuestas
+
+**Usuario:** ¿Cuáales son los síntomas del cáncer de mama?
+**Respuesta:** Los síntomas del cáncer de mama incluyen: metástasis a distancia del cáncer de mama, dolor en el pecho, secreción del pezón, grietas en el pezón, hepatomegalia, trastornos en la lactancia, retracción del pezón, bultos en el pecho, dolor intenso.
+
+---
+
+**Usuario:** Últimamente tengo mucho moco nasal, ¿qué puedo hacer?
+**Respuesta:** El síntoma de moco nasal puede estar asociado con las siguientes enfermedades: fiebre del heno, gripe secundaria, infección aguda del tracto respiratorio superior, intoxicación por sulfuro de hidrógeno, neumonía por clamidia infantil, resfriado por viento-frío, sinusitis frontal crónica, cefalea de origen nasal, gripe aviar, neumonía obstructiva bronquial infantil, gripe viral, rinitis crónica, viento-calor atacando el pulmón, resfriado común, asfixia, infección aguda del tracto respiratorio superior infantil, rinitis eosinofílica no alérgica, sinusitis caseosa, infección del tracto respiratorio inferior, sarampión.
+
+---
+
+**Usuario:** ¿Por qué algunas personas sufren de insomnio?
+**Respuesta:** Las posibles causas del insomnio incluyen: enfermedades físicas y el uso de medicamentos que pueden afectar el sueño, como indigestión, dolor de cabeza, dolor de espalda, artritis, enfermedades cardíacas, diabetes, asma, sinusitis, úlceras o el uso de ciertos medicamentos que afectan el sistema nervioso central. También es común que los problemas de sueño sean causados por el estilo de vida, como consumir café o té, beber alcohol por la noche, comer antes de dormir o cenar tarde, fumar en exceso, hacer ejercicio intenso antes de dormir, actividad mental excesiva antes de dormir, trabajar en turnos nocturnos, dormir siestas durante el día, horarios irregulares para acostarse y levantarse. Otras causas pueden ser estrés, preocupación excesiva, tensión o ansiedad, tristeza o depresión, enojo. Un ambiente ruidoso para dormir, un ambiente demasiado brillante, contaminación y hacinamiento también pueden causar problemas de sueño.
+
+---
+
+**Usuario:** ¿Qué complicaciones tiene el insomnio?
+**Respuesta:** Las complicaciones del insomnio incluyen: desarmonía entre el corazón y el riñón, acúfenos neurológicos, disfunción anormal de la trompa de Eustaquio, paranoia, reflujo duodenal gástrico y gastritis por reflujo biliar, bromhidrosis, melasma, arteritis de células gigantes, enfermedad de Stargardt, depresión, infarto cerebral lacunar, trastorno mental asociado con hipertiroidismo, cefalea tensional, gastroptosis, deficiencia de sangre cardíaca, conmoción laberíntica, úlceras bucales tuberculosas, retención de líquidos, paniculitis nodular migratoria, conmoción cerebral infantil.
+
+---
+
+**Usuario:** ¿Qué no deben comer las personas con insomnio?
+**Respuesta:** Los alimentos que deben evitarse en caso de insomnio incluyen: youtiao (tira de masa frita), almejas de río, manteca de cerdo (grasa de cerdo), mejillones frescos.
+
+---
+
+**Usuario:** ¿Qué debo comer si tengo acúfenos?
+**Respuesta:** Los alimentos recomendados para el acúfeno incluyen: semillas de calabaza, alas de pollo, sésamo, anacardos. Las recetas recomendadas incluyen: sopa de tofu y col china, fideos con sopa de carne de cordero, tofu frito con col china, sopa de huevo con algas y hierbas de loto, sopa de carne de cordero con lindera, alas de pollo con Coca-Cola, alas de pollo con castañas, brócoli con corazón de col china.
+
+---
+
+**Usuario:** ¿Quiénes no deben comer miel?
+**Respuesta:** Las personas que padecen encefalitis esporádica con trastorno mental asociado, trastorno afectivo del estado de ánimo, picadura de escorpión, linfedema de las extremidades, trastorno mental causado por intoxicación con pesticidas, tumor hepático disembrioplásico, neumonía bacteriana, mal de altura agudo, tumor de la fosa posterior craneal infantil, exantema por virus Coxsackie, hemangioma venoso orbital, trastorno mental asociado con encefalitis japonesa, hemorragia posparto tardía, neumonía por aspiración, lesión del nervio peroneo, enfermedades de la piel causadas por berilio y sus compuestos, enfermedad coronaria con muerte súbita, anomalía de Peter, nefritis tubulointersticial aguda alérgica, distensión abdominal infantil no deben comer miel.
+
+---
+
+**Usuario:** ¿Qué beneficios tiene la carne de ganso?
+**Respuesta:** Se recomienda que las personas con engrosamiento del endometrio, enfermedades respiratorias, enfermedades anorrectales, amenorrea, trastorno adaptativo tras la viudez, ectropión cervical, macroglobulinemia, sialoadenitis submaxilar aguda, daño extrapiramidal, adenoides, tos, hamartoma, enfermedades dentales, endometritis, síndrome de enclaustramiento, conjuntivitis, linfoma maligno, pie valgo, neuritis, miopía patológica prueben la carne de ganso.
+
+---
+
+**Usuario:** ¿Qué medicamentos debo tomar para enfermedades del hígado?
+**Respuesta:** Los alimentos recomendados para enfermedades del hígado incluyen: carne de ganso, carne de pollo, hígado de pollo, muslos de pollo. Las recetas recomendadas incluyen: gachas de mijo con azúcar moreno, gachas de mijo con huevo y leche, gachas de mijo con frijoles mungo, gachas de mijo con soja, gachas de mijo con ginseng, gachas de harina de mijo, gachas de mijo con champiñones, gachas de mijo con sésamo. Los medicamentos comúnmente utilizados para enfermedades del hígado incluyen: tabletas dispersables de entecavir, tabletas de vitamina C, píldoras Wuwei Songshi, cápsulas de lamivudina, tabletas de adefovir dipivoxil.
+
+---
+
+**Usuario:** ¿Qué enfermedades trata Banlangen Kulili?
+**Respuesta:** Banlangen Kulili se utiliza principalmente para tratar paperas epidémicas, amigdalitis, laringitis, sensación de cuerpo extraño en la faringe, faringitis aguda simple, infección del espacio parotídeo, faringitis alérgica, inflamación de la bolsa faríngea, nasofaringitis aguda, edema de laringe, parotiditis purulenta crónica, faringitis crónica, laringitis aguda, sensación de cuerpo extraño en la faringe, nasofaringitis, forúnculo de la garganta, faringolaringitis infantil, lesión del nervio laríngeo recurrente, parotiditis purulenta, hemangioma laríngeo.
+
+---
+
+**Usuario:** ¿Cómo se detecta la meningitis?
+**Respuesta:** La meningitis generalmente se puede detectar mediante las siguientes pruebas: sodio en el líquido cefalorraquídeo, análisis de orina, prueba del dedo de Fisher, rigidez de nuca, cultivo bacteriano del líquido cefalorraquídeo, glutamina en la orina, potasio en el líquido cefalorraquídeo, aspartato aminotransferasa en el líquido cefalorraquídeo, examen de patógenos en el líquido cefalorraquídeo, prueba de reducción de nitrato.
+
+---
+
+**Usuario:** ¿Cómo puedo prevenir la deficiencia renal?
+**Respuesta:** Las posibles causas de la deficiencia renal incluyen: 1. Exceso de actividad sexual o masturbación frecuente en la adolescencia. 2. Preocupación y melancolía que dañan el corazón y el bazo, afectando los vasos Chong y Yangming. 3. Miedo que daña los riñones. 4. El hígado controla los tendones, y los genitales son la convergencia de los tendones ancestrales. Si las emociones no se satisfacen, la tristeza, la preocupación y la ira afectan la capacidad del hígado para dispersar y drenar, lo que lleva a la disfunción de los tendones ancestrales. 5. Humedad-calor descendente, relajación de los tendones ancestrales. La deficiencia renal es un concepto integral que abarca varias afecciones causadas por la insuficiencia de la esencia, el qi, el yin y el yang de los riñones, como fatiga mental, mareos, tinnitus, pérdida de memoria, caída del cabello, dolor lumbar, emisiones nocturnas, impotencia, infertilidad masculina, infertilidad femenina y síndrome menopáusico. Las causas de la deficiencia renal se pueden dividir en dos aspectos: insuficiencia congénita y factores adquiridos. Desde la perspectiva de los factores congénitos que causan deficiencia renal, primero está la debilidad congénita. Según el capítulo "Shou Tian Gang Rou" de Ling Shu, "las personas al nacer pueden ser fuertes o débiles". Debido a que los padres están débiles y enfermos, y la esencia y la sangre son deficientes durante el embarazo, o debido a relaciones sexuales bajo la influencia del alcohol durante el embarazo, o cuando ambos padres tienen más de cincuenta años y su fuerza vital está significativamente reducida, o cuando la edad de los padres es demasiado joven y sus cuerpos no están completamente desarrollados, o debido a múltiples embarazos que agotan en gran medida la esencia y la sangre, o a la falta de cuidado durante el embarazo, lo que lleva a una insuficiencia de qi fetal, todo esto puede causar deficiencia de la esencia y el qi de los riñones, convirtiéndose en una causa importante de la deficiencia renal. En segundo lugar, si la función de los riñones para almacenar esencia es anormal, esto llevará a disfunción sexual, disminución de la función reproductiva y afectará la capacidad reproductiva, lo que resultará en que la próxima generación tenga cuerpos débiles, o defectos congénitos, discapacidad intelectual, defectos físicos, los hombres tendrán poca esperma e infertilidad, eyaculación precoz, y las mujeres tendrán amenorrea, infertilidad, abortos espontáneos o abortos habituales.
+
+Las medidas preventivas para la deficiencia renal incluyen:
+1. La vida sexual debe ser moderada, sin forzarse ni ser indulgente.
+2. En la dieta: cuando haya fatiga, consumir más alimentos ricos en hierro y proteínas, como hongos negros, dátiles chinos, gallina negra; para quienes tienen indigestión, beber más yogur y comer más hawthorn; para el cuidado diario de los riñones, comer más puerros, pepino de mar, ginseng, gallina negra y palomas.
+3. Realizar actividades de la zona lumbar con frecuencia, estos movimientos pueden fortalecer la puerta de la vida y tonificar los riñones. También se pueden hacer más masajes que estimulen la planta del pie. Según la medicina tradicional china, el punto Yongquan en la planta del pie es donde desciende el qi turbio. Masajear frecuentemente el punto Yongquan puede beneficiar la esencia y tonificar los riñones, fortalecer el cuerpo, prevenir el envejecimiento prematuro, además de aliviar el hígado, aclarar la visión, calmar la garganta, estabilizar la mente, promover el sueño y mejorar el apetito.
+4. Dormir lo suficiente también es una garantía importante para recuperar la energía. No importa cuán ocupado esté el trabajo o cuántas preocupaciones domésticas tenga, debe descansar a tiempo cuando sea hora de dormir.
+5. Evitar el consumo excesivo de alimentos amargos, fríos o helados, como aloe vera, melón amargo, helado, carne de ganso y cerveza, que pueden dañar los riñones. Se deben consumir más alimentos con alto contenido de melanina y propiedades cálidas y tónicas, como el arroz negro y los frijoles negros.
+6. Los hombres que entran en contacto con demasiados detergentes también pueden dañar los riñones. Las familias deben reducir el uso de detergentes para lavar utensilios y verduras para evitar la ingesta excesiva de residuos de detergentes.
+7. El ejercicio adecuado puede retrasar el envejecimiento, pero la intensidad no debe ser demasiado alta. Deben elegir actividades físicas acorde a sus capacidades para promover la circulación sanguínea y mejorar condiciones como estasis de sangre y daño de qi. Caminar, trotar, caminar rápido o caminar descalzo sobre piedras de río pueden promover la circulación sanguínea y tienen un efecto terapéutico auxiliar para la deficiencia renal.
+8. Mantener buenos hábitos de sueño y evitar trasnochar.
+9. Participar activamente en actividades al aire libre y relajarse.
+10. No ponerse demasiada presión y aprender a aliviar el estrés de manera razonable.
+
+---
+
+**Usuario:** ¿Cuánto tiempo tarda en curarse un resfriado?
+**Respuesta:** El tratamiento del resfriado puede durar: 7-14 días.
+
+---
+
+**Usuario:** ¿Cómo se trata la hipertensión?
+**Respuesta:** La hipertensión puede tratarse con los siguientes métodos: tratamiento farmacológico, tratamiento quirúrgico, tratamiento de soporte.
+
+---
+
+**Usuario:** ¿Se puede curar la leucemia?
+**Respuesta:** La probabilidad de curación de la leucemia es (solo como referencia): 50%-70%.
+
+---
+
+**Usuario:** ¿Qué personas son más propensas a tener hipertensión?
+**Respuesta:** Los grupos susceptibles a la hipertensión incluyen: personas con antecedentes familiares de hipertensión, personas con malos hábitos de vida y falta de ejercicio.
+
+---
+
+**Usuario:** Diabetes
+**Respuesta:** La diabetes es una enfermedad endocrina y metabólica relativamente común. Las causas de esta enfermedad se deben principalmente a la secreción insuficiente de insulina y la secreción excesiva inapropiada de glucagón. Es más común en pacientes mayores de 40 años que consumen muchos dulces y tienen sobrepeso. Es más frecuente en áreas urbanas que en rurales y a menudo tiene antecedentes familiares, por lo que está relacionada con la genética. Algunos pacientes están relacionados con infecciones virales y reacciones autoinmunes. Los síntomas principales incluyen sed excesiva, polidipsia, poliuria, polifagia, fatiga y pérdida de peso. Es una enfermedad común que amenaza la vida y a menudo se acompaña de hipertensión, enfermedad coronaria, hiperlipidemia, etc., y puede ser potencialmente mortal en casos graves. Según la medicina tradicional china, el hígado regula la dispersión y está relacionado con el ascenso y descenso del mecanismo de recepción del cuerpo. Si el qi del hígado está estancado, el mecanismo de qi ascendente y descendente se desordena. Cuando el hígado pierde su capacidad de dispersión, sustancias esenciales como el azúcar en la sangre no pueden distribuirse por todo el cuerpo junto con el qi claro yang, lo que lleva a un estancamiento en la sangre o una distribución desordenada de sustancias esenciales, lo que resulta en un aumento del azúcar en la sangre. Esto, a su vez, causa desórdenes en otras sustancias esenciales como los lípidos en sangre y las proteínas, lo que lleva a otras complicaciones. El tratamiento se centra en aliviar el qi del hígado y regular el qi. Siguiendo la naturaleza dispersante y reguladora del hígado para restaurar su función fisiológica, cuando el qi del hígado fluye sin obstáculos y el mecanismo de qi está armonizado, las sustancias esenciales pueden distribuirse y el azúcar puede ser utilizado, reduciendo naturalmente los niveles de azúcar en la sangre. Además, la aparición de la diabetes está relacionada con la dieta. El efecto del control dietético afecta directamente los resultados del tratamiento. Junto con el ejercicio y prestando atención a la regulación emocional, combinado con un tratamiento adecuado con medicina tradicional china, se pueden obtener buenos resultados terapéuticos.
+
+---
+
+**Usuario:** ¿Qué enfermedades puede detectar un hemograma completo?
+**Respuesta:** Generalmente, las siguientes enfermedades pueden detectarse mediante un hemograma completo: escleritis reumatoide del adulto, síndrome vulvovaginal-gingival, lesión por descarga eléctrica, hipertensión sistólica en ancianos, cirrosis infantil, hemoglobinopatía, síndrome demencial, trastorno mental asociado con hipertensión, linfoma testicular, anemia por deficiencia de folato, endoftalmitis, hemoglobinopatía inestable, síndrome carcinoide, demencia senil, linfangitis aguda, embarazo cervical, úlcera corneal corrosiva, leucemia aguda hipoplásica, oftalmía simpática, enfermedad por inmunodeficiencia primaria.
+
+---
+
+### Resumen
+
+1. Este proyecto logró construir desde cero un grafo de conocimiento médico centrado en enfermedades, utilizando datos de sitios web verticales. El grafo incluye 44,000 entidades y 300,000 relaciones entre ellas. Sobre esta base, se desarrolló un pequeño sistema de preguntas y respuestas capaz de responder 18 tipos de preguntas, todo en un período de 3 días. La recolección y organización de datos tomó 1 día, la construcción e importación del grafo de conocimiento tomó medio día, y el desarrollo del sistema de preguntas y respuestas tomó un día y medio. En general, fue un proceso relativamente rápido.
+
+2. Este proyecto se guió por las necesidades del negocio para construir el grafo de conocimiento médico. El diseño del esquema de conocimiento se basó en los datos estructurados recolectados (analizando los datos estructurados de las páginas web mediante xpath).
+
+3. Este proyecto utiliza neo4j como almacenamiento y completa el servicio de preguntas y respuestas basado en reglas tradicionales, utilizando finalmente consultas en lenguaje Cypher como SQL de búsqueda para preguntas y respuestas.
+
+4. Este proyecto se puede implementar rápidamente. Los datos ya están disponibles en `data/medical.json`. Si los datos de este proyecto infringen los derechos de alguna unidad, por favor contácteme para eliminarlos. Los datos de este proyecto no deben usarse con fines comerciales para evitar disputas innecesarias. Para la implementación de este proyecto, se pueden seguir los pasos de ejecución del proyecto para construir la base de datos y proporcionar servicios de búsqueda.
+
+5. Este proyecto aún tiene deficiencias: en cuanto a las causas y prevención de enfermedades, actualmente devuelve un gran bloque de texto. Aquí se podría introducir el concepto de extracción de eventos para representar estructuralmente las causas. Esto se puede intentar en el futuro.
+
+Si tienes alguna pregunta sobre el proyecto o sobre mí, visita [mi página de GitHub](https://liuhuanyong.github.io/).
+
+Para preguntas o colaboraciones sobre procesamiento de lenguaje natural, grafos de conocimiento, grafos de eventos, computación social y construcción de recursos lingüísticos, puedes contactarme:
+1. Mis proyectos en GitHub: [liuhuanyong.github.io](https://liuhuanyong.github.io)
+3. Acerca de mí: Liu Huanyong, lhy_in_blcu@126.com.
+4. Mi cuenta pública en WeChat: Lao Liu habla sobre PLN (Procesamiento de Lenguaje Natural), escanea el código para seguirme:
+![imagen](https://github.com/liuhuanyong/QABasedOnMedicalKnowledgeGraph/blob/master/img/wechat.jpg)
 
