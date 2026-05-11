@@ -8,7 +8,7 @@ from question_classifier import *
 from question_parser import *
 from answer_search import *
 
-'''问答类'''
+'''Clase de Preguntas y Respuestas'''
 class ChatBotGraph:
     def __init__(self):
         self.classifier = QuestionClassifier()
@@ -16,7 +16,7 @@ class ChatBotGraph:
         self.searcher = AnswerSearcher()
 
     def chat_main(self, sent):
-        answer = '您好，我是小勇医药智能助理，希望可以帮到您。如果没答上来，可联系https://liuhuanyong.github.io/。祝您身体棒棒！'
+        answer = 'Hola, soy el asistente médico inteligente pingüino chino, espero poder ayudarle. Si no puedo responder, puede contactar a https://liuhuanyong.github.io/. ¡Le deseo muy buena salud!'
         res_classify = self.classifier.classify(sent)
         if not res_classify:
             return answer
@@ -30,7 +30,7 @@ class ChatBotGraph:
 if __name__ == '__main__':
     handler = ChatBotGraph()
     while 1:
-        question = input('用户:')
+        question = input('Usuario: ')
         answer = handler.chat_main(question)
-        print('小勇:', answer)
+        print('pingüino chino:', answer)
 
